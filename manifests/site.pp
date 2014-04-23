@@ -14,11 +14,16 @@ node 'uwg-dw01' {
     priority        => '00',
     docroot         => '/var/www/degreeworks',
     options         => $httpoptions,
-    addhandlers     => $dwhandlers,
-    allow_override  => ['All'],
-    order           => 'Allow,Deny',
-    allow           => 'from all',
-    directoryindex  => 'default.html',
+    directories     => [
+      { path           => '/var/www/degreeworks',
+        addhandlers    => $dwhandlers,
+        directoryindex => 'default.html',
+
+        allow_override => ['All'],
+        order          => 'Allow,Deny',
+        allow          => 'from all',
+      },
+    ],
   }
 
   ::apache::vhost { 'default-ssl-vhost':
@@ -27,11 +32,16 @@ node 'uwg-dw01' {
     priority        => '00',
     docroot         => '/var/www/degreeworks',
     options         => $httpoptions,
-    addhandlers     => $dwhandlers,
-    allow_override  => ['All'],
-    order           => 'Allow,Deny',
-    allow           => 'from all',
-    directoryindex  => 'default.html',
+    directories     => [
+      { path           => '/var/www/degreeworks',
+        addhandlers    => $dwhandlers,
+        directoryindex => 'default.html',
+
+        allow_override => ['All'],
+        order          => 'Allow,Deny',
+        allow          => 'from all',
+      },
+    ],
 
     ssl             => true,
     ssl_protocol    => '-ALL +SSLv3 +TLSv1',
