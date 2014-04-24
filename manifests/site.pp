@@ -1,5 +1,6 @@
 node 'uwg-dw01' {
   include degreeworks
+  include oracledb
 
   class {'apache':
     default_vhost   => false,
