@@ -96,6 +96,9 @@ node 'dev01.cms.westga.edu' {
 
   class {'apache':
     default_vhost   => false,
+    default_mods    => false,
+    mpm_module      => 'prefork',
+    servername      => 'dev01.cms.westga.edu',
   }
 
   $httpoptions = [ '-Indexes', 'FollowSymLinks' ]
@@ -137,4 +140,20 @@ node 'dev01.cms.westga.edu' {
     ssl_protocol    => 'All -SSLv2',
     ssl_cipher      => 'ALL:!ADH:!EXPORT:!SSLv2:RC4+RSA:+HIGH:+MEDIUM:+LOW',
   }
+
+  include apache::mod::php
+  class {'apache::mod::info':
+    #restrict_access => false,
+    allow_from      => [
+      '160.10.36', 
+      '160.10.38', 
+      '127.0.0.1',
+    ],
+  }
+
+  class { 'apache::mod::ssl':
+    ssl_compression => false,
+    ssl_options     => [ 'StdEnvVars' ],
+  }
+
 }
