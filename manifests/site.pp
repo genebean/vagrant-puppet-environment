@@ -157,3 +157,15 @@ node 'dev01.cms.westga.edu' {
   }
 
 }
+
+node 'dogpile' {
+  include ::base
+}
+
+node 'xander.westga.info' {
+  # This is our Linode.
+  # It will be a Zabbix server and run Nginx / PHP.
+  # It will also have a local Postfix server setupto send notices.
+  # This node also has IPv6 enabled so some things will need to be adjusted
+  #  so as not to break this.
+}
