@@ -158,10 +158,6 @@ node 'dev01.cms.westga.edu' {
 
 }
 
-node 'dogpile' {
-  include ::base
-}
-
 node 'xander.westga.info' {
   # This is our Linode.
   # It will be a Zabbix server and run Nginx / PHP.
