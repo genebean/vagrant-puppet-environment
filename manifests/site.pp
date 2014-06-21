@@ -210,6 +210,9 @@ node 'dev01.cms.westga.edu' {
 
 }
 
+node 'jonsnow.uwg.westga.edu' {
+  # This is the student web server
+}
 node 'xander.westga.info' {
   # This is our Linode.
   # It will be a Zabbix server and run Nginx / PHP.
