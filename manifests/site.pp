@@ -1,3 +1,7 @@
+node 'puppetmaster01' {
+
+}
+
 node 'uwg-dw01' {
   include degreeworks
   include oracledb
