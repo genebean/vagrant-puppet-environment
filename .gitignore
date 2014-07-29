@@ -1,2 +1,3 @@
+.vagrant/
 environments/*/modules/
 modules/
