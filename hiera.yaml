@@ -1,0 +1,32 @@
+---
+:backends:
+  - eyaml
+  - yaml
+  - file
+ 
+:merge_behavior: native
+
+:hierarchy:
+  - defaults
+  - node/%{clientcert}
+  - facts/osfamily/%{osfamily}/%{lsbdistcodename}
+  - facts/osfamily/%{osfamily}/%{lsbmajdistrelease}
+  - facts/osfamily/%{osfamily}/%{architecture}
+  - facts/osfamily/%{osfamily}/common
+  - modules/%{caller_module_name}
+  - modules/%{module_name}
+  - environments/%{environment}
+  - global
+
+:eyaml:
+  :datadir: /etc/puppet/hieradata
+  # If using the pkcs7 encryptor (default)
+  #:pkcs7_private_key: /path/to/private_key.pkcs7.pem
+  #:pkcs7_public_key:  /path/to/public_key.pkcs7.pem
+
+:file:
+  :datadir: /etc/puppet/hieradata
+
+:yaml:
+  :datadir: /etc/puppet/hieradata
+
