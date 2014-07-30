@@ -1,0 +1,9 @@
+:cachedir: /var/cache/r10k
+:sources:
+  gitlab:
+    basedir: /etc/puppet/environments
+    prefix: false
+    remote: git@code.westga.edu:puppet-config/puppet-environments.git
+
+:purgedirs:
+  - /etc/puppet/environments

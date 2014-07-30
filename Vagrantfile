@@ -10,15 +10,18 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.hostname = "puppet"
 
   # Install Puppet and needed modules
+  config.vm.provision "shell", path:   "scripts/envsetup.sh"
   config.vm.provision "shell", path:   "scripts/puppet.sh"
-  #config.vm.provision "shell", path:   "scripts/puppet-modules.sh"
+  config.vm.provision "shell", path:   "scripts/r10k.sh"
 
-  # Configure the VM
-  #config.vm.provision "puppet" do |puppet|
-  #  puppet.manifests_path = "puppet/manifests"
-  #  puppet.module_path    = "puppet/modules"
-  #  puppet.manifest_file  = "site.pp"
-  #end
+  # Setup r10k
+  config.vm.provision "puppet" do |puppet|
+    puppet.manifests_path = "scripts"
+    puppet.manifest_file  = "r10k_installation.pp"
+  end
+  
+  # The manifest above ends with some errors... this tells us Vagrant continued.
+  config.vm.provision "shell", inline: "echo Finished running r10k_installation.pp"
 
   config.vm.provider "vmware_desktop" do |v|
     v.gui = false
