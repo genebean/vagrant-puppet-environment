@@ -12,6 +12,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Install Puppet and needed modules
   config.vm.provision "shell", path:   "scripts/envsetup.sh"
   config.vm.provision "shell", path:   "scripts/puppet.sh"
+  config.vm.provision "shell", path:   "scripts/copy-files.sh"
   config.vm.provision "shell", path:   "scripts/r10k.sh"
 
   # Setup r10k
