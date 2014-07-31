@@ -17,3 +17,9 @@ file { '/var/cache/r10k':
   owner             => 'puppet',
   group             => 'puppet',
 }
+
+file { '/etc/puppet/environments':
+  owner             => 'puppet',
+  group             => 'puppet',
+  recurse           => true,
+}
