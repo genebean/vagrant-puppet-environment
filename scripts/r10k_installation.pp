@@ -8,4 +8,12 @@ class { 'r10k':
       'prefix'  => false,
     }
   },
+  
+  require           => File['/var/cache/r10k'],
+}
+
+file { '/var/cache/r10k':
+  ensure            => directory,
+  owner             => 'puppet',
+  group             => 'puppet',
 }
