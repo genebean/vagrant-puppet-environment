@@ -1,3 +1,5 @@
+Package {  allow_virtual => true, }
+
 class { 'r10k':
   manage_modulepath => false,
   purgedirs         => ["${::settings::confdir}/environments"],
