@@ -20,8 +20,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     pm.vm.provision "shell", inline: "puppet apply /vagrant/scripts/r10k_installation.pp --test --verbose; echo 'Finished installing r10k.'"
     #pm.vm.provision "shell", inline: "cd /etc/puppet; sudo -u puppet -H r10k deploy environment -pv"
 
-    pm.vm.network "private_network", type: "dhcp"
-    pm.vm.network "forwarded_port", guest: 80, host: 8082
+    pm.vm.network "private_network", ip: "172.28.128.20"
   end
 
   config.vm.define "puppetdb" do |puppetdb|
@@ -35,7 +34,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     puppetdb.vm.provision "shell", inline: "puppet module install puppetlabs-puppetdb"
     puppetdb.vm.provision "shell", inline: "puppet apply /vagrant/scripts/puppetdb.pp"
  
-    puppetdb.vm.network "private_network", type: "dhcp"
+    puppetdb.vm.network "private_network", ip: "172.28.128.21"
     puppetdb.vm.network "forwarded_port", guest: 8080, host: 8080
   end
 
@@ -53,8 +52,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     #foreman.vm.provision "shell", inline: "puppet agent -t --waitforcert 30"
     #foreman.vm.provision "shell", inline: "echo 'foreman-installer --puppet-server=false --foreman-proxy-puppetrun=false --foreman-proxy-puppetca=false -v' > /root/foreman.sh; chmod +x /root/foreman.sh"
 
-    foreman.vm.network "private_network", type: "dhcp"
-    foreman.vm.network "forwarded_port", guest: 80, host: 8081
+    foreman.vm.network "private_network", ip: "172.28.128.22"
+    foreman.vm.network "forwarded_port", guest: 80,  host: 8081
+    foreman.vm.network "forwarded_port", guest: 443, host: 8443
   end
 
   config.vm.provider "vmware_desktop" do |v|
