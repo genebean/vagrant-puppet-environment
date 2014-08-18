@@ -7,20 +7,23 @@ VAGRANTFILE_API_VERSION = "2"
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box = "genebean/centos6-64bit"
 
-  config.vm.define "puppetmaster" do |puppetmaster|
-    puppetmaster.vm.hostname = "puppet"
-    
-    puppetmaster.vm.provision "shell", path:   "scripts/envsetup.sh"
-    puppetmaster.vm.provision "shell", path:   "scripts/puppet.sh"
-    puppetmaster.vm.provision "shell", path:   "scripts/copy-files.sh"
-    puppetmaster.vm.provision "shell", path:   "scripts/hieradata.sh"
-    puppetmaster.vm.provision "shell", path:   "scripts/r10k.sh"
-    puppetmaster.vm.provision "shell", inline: "puppet apply /vagrant/scripts/r10k_installation.pp"
-    puppetmaster.vm.provision "shell", inline: "cd /etc/puppet; sudo -u puppet -H r10k deploy environment -pv"
- 
-    puppetmaster.vm.network "private_network", type: "dhcp"
+  config.vm.define "pm" do |pm|
+    pm.vm.hostname = "pm.localdomain"
+
+    pm.vm.provision "shell", path:   "scripts/envsetup.sh"
+    pm.vm.provision "shell", path:   "scripts/puppet.sh"
+    pm.vm.provision "shell", inline: "puppet module install theforeman-puppet"
+    pm.vm.provision "shell", path:   "scripts/copy-files.sh"
+    pm.vm.provision "shell", path:   "scripts/hieradata.sh"
+    pm.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-master-1.pp"
+    pm.vm.provision "shell", path:   "scripts/r10k-module.sh"
+    pm.vm.provision "shell", inline: "puppet apply /vagrant/scripts/r10k_installation.pp --test --verbose; echo 'Finished installing r10k.'"
+    #pm.vm.provision "shell", inline: "cd /etc/puppet; sudo -u puppet -H r10k deploy environment -pv"
+
+    pm.vm.network "private_network", type: "dhcp"
+    pm.vm.network "forwarded_port", guest: 80, host: 8082
   end
-  
+
   config.vm.define "puppetdb" do |puppetdb|
     puppetdb.vm.hostname = "puppetdb.localdomain"
 
@@ -52,22 +55,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     foreman.vm.network "private_network", type: "dhcp"
     foreman.vm.network "forwarded_port", guest: 80, host: 8081
-  end
-
-  config.vm.define "pm" do |pm|
-    pm.vm.hostname = "pm.localdomain"
-
-    pm.vm.provision "shell", path:   "scripts/envsetup.sh"
-    pm.vm.provision "shell", path:   "scripts/puppet.sh"
-    pm.vm.provision "shell", inline: "puppet module install theforeman-puppet"
-    pm.vm.provision "shell", path:   "scripts/copy-files.sh"
-    pm.vm.provision "shell", path:   "scripts/hieradata.sh"
-    pm.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-master-1.pp"
-    pm.vm.provision "shell", path:   "scripts/r10k-module.sh"
-    pm.vm.provision "shell", inline: "puppet apply /vagrant/scripts/r10k_installation.pp --test --verbose; echo 'Finished installing r10k.'"
-
-    pm.vm.network "private_network", type: "dhcp"
-    pm.vm.network "forwarded_port", guest: 80, host: 8082
   end
 
   config.vm.provider "vmware_desktop" do |v|
