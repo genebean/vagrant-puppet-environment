@@ -26,6 +26,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     puppetdb.vm.provision "shell", path:   "scripts/envsetup.sh"
     puppetdb.vm.provision "shell", path:   "scripts/puppet.sh"
+    puppetdb.vm.provision "shell", inline: "puppet module install theforeman-puppet"
+    puppetdb.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-agent-install.pp"
+    puppetdb.vm.provision "shell", inline: "puppet agent -t --waitforcert 120"
+    puppetdb.vm.provision "shell", inline: "puppet module install puppetlabs-puppetdb"
+    puppetdb.vm.provision "shell", inline: "puppet apply /vagrant/scripts/puppetdb.pp"
  
     puppetdb.vm.network "private_network", type: "dhcp"
     puppetdb.vm.network "forwarded_port", guest: 8080, host: 8080
@@ -54,6 +59,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     pm.vm.provision "shell", path:   "scripts/envsetup.sh"
     pm.vm.provision "shell", path:   "scripts/puppet.sh"
+    pm.vm.provision "shell", inline: "puppet module install theforeman-puppet"
+    pm.vm.provision "shell", path:   "scripts/copy-files.sh"
+    pm.vm.provision "shell", path:   "scripts/hieradata.sh"
+    pm.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-master-1.pp"
+    pm.vm.provision "shell", path:   "scripts/r10k-module.sh"
+    pm.vm.provision "shell", inline: "puppet apply /vagrant/scripts/r10k_installation.pp --test --verbose; echo 'Finished installing r10k.'"
 
     pm.vm.network "private_network", type: "dhcp"
     pm.vm.network "forwarded_port", guest: 80, host: 8082

@@ -1,25 +1,29 @@
 class { '::puppet':
   pluginsync                    => true,
-  runmode                       => 'none',
-  dns_alt_names                 => [ 'puppet', ],
+  runmode                       => 'service',
+  dns_alt_names                 => [ 'puppet', 'puppet.westga.edu', 'puppet.uwg.westga.edu',
+                                     'puppetmaster01.westga.edu', 'puppetmaster01.uwg.westga.edu',
+                                     'puppetmaster02.westga.edu', 'puppetmaster02.uwg.westga.edu' ],
   
   agent                         => true,
   puppetmaster                  => 'pm.localdomain',
 
   server                        => true,
   server_ca                     => true,
-  server_reports                => 'log,store', #,puppetdb,foreman
+  server_reports                => 'log,store,puppetdb',
   server_passenger              => true,
-  server_external_nodes         => '', # /etc/puppet/node.rb
+  server_external_nodes         => '',
   server_dynamic_environments   => false,
   server_directory_environments => true,
-  server_environments           => [],
+  server_environments           => [ ],
   server_environments_owner     => 'puppet',
   server_environments_group     => 'puppet',
   server_envs_dir               => '/etc/puppet/environments',
-  #server_storeconfigs_backend   => 'puppetdb',
+  server_common_modules_path    => [ '/etc/puppet/modules', ],
+  server_storeconfigs_backend   => 'puppetdb',
   server_certname               => 'pm.localdomain',
 
+  server_service_fallback       => false,
   server_passenger_max_pool     => 4, #default is 12
   server_foreman_url            => 'https://foreman.localdomain',
   server_foreman_ssl_ca         => '/var/lib/puppet/ssl/certs/ca_crt.pem',
@@ -29,9 +33,9 @@ class { '::puppet':
   server_report_api             => 'v2',
   
 }
-
-# Here we configure the puppet master to use PuppetDB,
-# and tell it that the hostname is ‘puppetdb’
-#class { 'puppetdb::master::config':
-#  puppetdb_server => 'puppetdb',
-#}
+class { '::puppetdb::master::config':
+  puppetdb_server         => 'puppetdb.localdomain',
+  manage_storeconfigs     => false,
+  manage_report_processor => false,
+  puppet_service_name     => 'httpd',
+}

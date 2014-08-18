@@ -1,5 +1,11 @@
 Package {  allow_virtual => true, }
 
+file { '/var/cache/r10k':
+  ensure            => directory,
+  owner             => 'puppet',
+  group             => 'puppet',
+}
+
 class { 'r10k':
   manage_modulepath => false,
   purgedirs         => ["${::settings::confdir}/environments"],
@@ -12,16 +18,4 @@ class { 'r10k':
   },
   
   require           => File['/var/cache/r10k'],
-}
-
-file { '/var/cache/r10k':
-  ensure            => directory,
-  owner             => 'puppet',
-  group             => 'puppet',
-}
-
-file { '/etc/puppet/environments':
-  owner             => 'puppet',
-  group             => 'puppet',
-  recurse           => true,
 }
