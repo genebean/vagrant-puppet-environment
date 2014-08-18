@@ -1,3 +1,4 @@
+## The setting below accepts what will become the default
 Package {  allow_virtual => true, }
 
 file { '/var/cache/r10k':
@@ -19,3 +20,4 @@ class { 'r10k':
   
   require           => File['/var/cache/r10k'],
 }
+

@@ -1,3 +1,6 @@
+## The setting below accepts what will become the default
+Package {  allow_virtual => true, }
+
 class { '::puppet':
   pluginsync                    => true,
   runmode                       => 'service',
@@ -39,3 +42,4 @@ class { '::puppetdb::master::config':
   manage_report_processor => false,
   puppet_service_name     => 'httpd',
 }
+
