@@ -7,7 +7,7 @@
 :merge_behavior: native
 
 :hierarchy:
-  - defaults
+  - global
   - node/%{clientcert}
   - facts/osfamily/%{osfamily}/%{lsbdistcodename}
   - facts/osfamily/%{osfamily}/%{lsbmajdistrelease}
@@ -16,7 +16,7 @@
   - modules/%{caller_module_name}
   - modules/%{module_name}
   - environments/%{environment}
-  - global
+  - defaults
 
 :eyaml:
   :datadir: /etc/puppet/hieradata
