@@ -10,5 +10,5 @@ else
 fi
 
 echo 'Install gems used by hiera'
-gem install hiera-eyaml
-gem install hiera-file
+gem install hiera-eyaml --no-rdoc --no-ri
+gem install hiera-file --no-rdoc --no-ri
