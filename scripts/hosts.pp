@@ -3,6 +3,7 @@ Package {  allow_virtual => true, }
 
 host { 'pm.localhost':
   ip => '172.28.128.20',
+  host_aliases => 'puppet',
 }
 
 host { 'puppetdb.localhost':
