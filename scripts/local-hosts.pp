@@ -1,9 +1,11 @@
 ## The setting below accepts what will become the default
 Package {  allow_virtual => true, }
 
-host { 'localhost':
+host { "$::fqdn":
   ip           => '127.0.0.1',
-  host_aliases => [ 'localhost.localdomain', ],
+  host_aliases => [ "$::hostname", 
+                    'localhost', 'localhost.localdomain',
+                    'localhost4', 'localhost4.localdomain4' ],
 }
 
 host { 'pm.localdomain':
