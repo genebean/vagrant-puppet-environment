@@ -20,6 +20,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     pm.vm.provision "shell", path:   "scripts/r10k-module.sh"
     pm.vm.provision "shell", inline: "puppet apply /vagrant/scripts/r10k_installation.pp --test --verbose; echo 'Finished installing r10k.'"
     #pm.vm.provision "shell", inline: "cd /etc/puppet; sudo -u puppet -H r10k deploy environment -pv"
+    #pm.vm.provision "shell", inline: "puppet module install theforeman-foreman_proxy"
 
     pm.vm.network "private_network", ip: "172.28.128.20"
   end
@@ -52,6 +53,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     foreman.vm.provision "shell", inline: "yum -y install foreman-installer"
     foreman.vm.provision "shell", inline: "puppet module install theforeman-puppet"
     foreman.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-agent-install.pp"
+    foreman.vm.provision "shell", inline: "sleep 30"
     foreman.vm.provision "shell", inline: "puppet agent -t --waitforcert 120"
     foreman.vm.provision "shell", inline: "echo 'foreman-installer --puppet-server=false --foreman-proxy-puppetrun=false --foreman-proxy-puppetca=false -v' > /root/foreman.sh; chmod +x /root/foreman.sh"
 
