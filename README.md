@@ -12,7 +12,8 @@ This repo has everything needed to setup a Puppet Master including the files nee
 2. Automate foreman-proxy setup
 3. Automate foreman install via a while loop and checking exit codes
 4. When does r10k get run on pm?
-5. Design a method for EApps / Web Team people to author data
+5. Implement the eyaml backend for Hiera and move sensitive data into it.
+6. Design a method for EApps / Web Team people to author data
 
 ## Installing for development / testing
 
