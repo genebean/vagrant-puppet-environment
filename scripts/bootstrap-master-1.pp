@@ -23,9 +23,10 @@ class { '::puppet':
   server_environments_group     => 'puppet',
   server_envs_dir               => '/etc/puppet/environments',
   server_common_modules_path    => [ '/etc/puppet/modules', ],
-  #server_storeconfigs_backend   => 'puppetdb',
+
   server_certname               => 'pm.localdomain',
 
+  server_service_fallback       => false,
   server_passenger_max_pool     => 4, #default is 12
   server_foreman_url            => 'https://foreman.localdomain',
   server_foreman_ssl_ca         => '/var/lib/puppet/ssl/certs/ca_crt.pem',

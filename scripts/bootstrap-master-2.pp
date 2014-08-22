@@ -13,9 +13,9 @@ class { '::puppet':
 
   server                        => true,
   server_ca                     => true,
-  server_reports                => 'log,store,puppetdb',
+  server_reports                => 'log,store,puppetdb,foreman',
   server_passenger              => true,
-  server_external_nodes         => '',
+  server_external_nodes         => '/etc/puppet/node.rb',
   server_dynamic_environments   => false,
   server_directory_environments => true,
   server_environments           => [ ],
@@ -29,7 +29,7 @@ class { '::puppet':
   server_service_fallback       => false,
   server_passenger_max_pool     => 4, #default is 12
   server_foreman_url            => 'https://foreman.localdomain',
-  server_foreman_ssl_ca         => '/var/lib/puppet/ssl/certs/ca_crt.pem',
+  server_foreman_ssl_ca         => '/var/lib/puppet/ssl/certs/ca.pem',
   server_foreman_ssl_cert       => '/var/lib/puppet/ssl/certs/pm.localdomain.pem',
   server_foreman_ssl_key        => '/var/lib/puppet/ssl/private_keys/pm.localdomain.pem',
   server_enc_api                => 'v2',
