@@ -36,6 +36,7 @@ vagrant up puppetdb
 
 # The Foreman (ENC and report processor)
 vagrant up foreman
+# from host computer, go to http://127.0.0.1:8081 and log in with admin / changeme
 
 # configure foreman-proxy for pm <--> foreman communication
 vagrant ssh pm
