@@ -8,14 +8,14 @@
 
 :hierarchy:
   - global
-  - node/%{clientcert}
-  - facts/osfamily/%{osfamily}/%{lsbdistcodename}
-  - facts/osfamily/%{osfamily}/%{lsbmajdistrelease}
-  - facts/osfamily/%{osfamily}/%{architecture}
-  - facts/osfamily/%{osfamily}/common
-  - modules/%{caller_module_name}
-  - modules/%{module_name}
-  - environments/%{environment}
+  - node/%{::clientcert}
+  - facts/osfamily/%{::osfamily}/%{::lsbdistcodename}
+  - facts/osfamily/%{::osfamily}/%{::lsbmajdistrelease}
+  - facts/osfamily/%{::osfamily}/%{::architecture}
+  - facts/osfamily/%{::osfamily}/common
+  - modules/%{::caller_module_name}
+  - modules/%{::module_name}
+  - environments/%{::environment}
   - defaults
 
 :eyaml:
