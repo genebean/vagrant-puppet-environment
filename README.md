@@ -37,11 +37,21 @@ vagrant up puppetdb
 
 # The Foreman (ENC and report processor)
 vagrant up foreman
-# from host computer, go to http://127.0.0.1:8081 and log in with admin / changeme
+vagrant ssh foreman
+sudo -s
+/root/foreman.sh #actually installs foreman
+
+# fix puppet agent setup
+puppet apply /vagrant/scripts/bootstrap-agent-install.pp
+
+# from host computer, go to http://127.0.0.1:8081 and log in the name and password output by the installer
+# change the admin password to something that can be remembered.
 
 # configure foreman-proxy for pm <--> foreman communication
 vagrant ssh pm
 sudo -s
+puppet module install theforeman-foreman_proxy
+# insert configuration of this module here...
 sh /vagrant/scripts/post-flight.sh
 ```
 
