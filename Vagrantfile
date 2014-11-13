@@ -33,7 +33,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     puppetdb.vm.provision "shell", inline: "puppet apply /vagrant/scripts/local-hosts.pp"
     puppetdb.vm.provision "shell", inline: "puppet module install theforeman-puppet"
     puppetdb.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-agent-install.pp"
-    foreman.vm.provision "shell", inline: "echo 'sleeping for a minute...'; sleep 60"
+    puppetdb.vm.provision "shell", inline: "echo 'sleeping for a minute...'; sleep 60"
     puppetdb.vm.provision "shell", inline: "puppet agent -t --waitforcert 120"
     puppetdb.vm.provision "shell", inline: "puppet module install puppetlabs-puppetdb"
     puppetdb.vm.provision "shell", inline: "puppet apply /vagrant/scripts/puppetdb.pp"
