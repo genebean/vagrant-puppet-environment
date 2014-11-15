@@ -6,5 +6,6 @@ class { '::puppet':
   runmode      => 'service',
   agent        => true,
   puppetmaster => 'pm.localdomain',
+  ca_server	   => 'foreman.localdomain',
 }
 

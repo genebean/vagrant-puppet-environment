@@ -1,3 +1,4 @@
 .vagrant/
 environments/*/modules/
 modules/
+/scripts/ssl/*/*.pem

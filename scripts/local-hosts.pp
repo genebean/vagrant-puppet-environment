@@ -21,3 +21,7 @@ host { 'foreman.localdomain':
   ip           => '172.28.128.22',
 }
 
+host { 'client.localdomain':
+  ip           => '172.28.128.23',
+}
+
