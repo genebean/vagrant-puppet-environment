@@ -4,16 +4,17 @@ Package {  allow_virtual => true, }
 class { '::puppet':
   pluginsync                    => true,
   runmode                       => 'service',
-  dns_alt_names                 => [ 'puppet', 'puppet.westga.edu', 'puppet.uwg.westga.edu',
-                                     'puppetmaster01.westga.edu', 'puppetmaster01.uwg.westga.edu',
-                                     'puppetmaster02.westga.edu', 'puppetmaster02.uwg.westga.edu' ],
-  
+  ca_server                     => 'foreman.localdomain',
+  #dns_alt_names                 => [ 'puppet', 'puppet.westga.edu', 'puppet.uwg.westga.edu',
+  #                                   'puppet01.westga.edu', 'puppet01.uwg.westga.edu',
+  #                                   'puppet02.westga.edu', 'puppet02.uwg.westga.edu' ],
+
   agent                         => true,
   puppetmaster                  => 'pm.localdomain',
 
   server                        => true,
-  server_ca                     => true,
-  server_reports                => 'log,store,puppetdb,foreman',
+  server_ca                     => false,
+  server_reports                => 'puppetdb,foreman',
   server_passenger              => true,
   server_external_nodes         => '/etc/puppet/node.rb',
   server_dynamic_environments   => false,
@@ -42,4 +43,3 @@ class { '::puppetdb::master::config':
   manage_report_processor => false,
   puppet_service_name     => 'httpd',
 }
-

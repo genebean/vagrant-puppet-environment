@@ -4,16 +4,16 @@ This repo has everything needed to setup a Puppet Master including the files nee
 
 ## Version
 
+0.2 - Redo based on Foreman 1.6
 0.1 - Design phase
 
 ### ToDo List:
 
 1. Implement a method to keep the Hiera data up-to-date (vcsrepo module)
 2. Automate foreman-proxy setup
-3. Automate foreman install via a while loop and checking exit codes
-4. When does r10k get run on pm?
-5. Implement the eyaml backend for Hiera and move sensitive data into it.
-6. Design a method for EApps / Web Team people to author data
+3. When does r10k get run on pm? (via provided web hook... need to set this up still)
+4. Implement the eyaml backend for Hiera and move sensitive data into it.
+5. Design a method for EApps / Web Team people to author data
 
 ## Installing for development / testing
 
@@ -22,38 +22,67 @@ installed. The first time you run `vagrant up` it will take a few minutes to dow
 the [box] (virtual machine template). This is a one-time thing. The box specified in 
 the Vagrantfile supports [Virtualbox], [VMware Workstation], and [VMware Fusion].
 
+The setps below need to be followed in order to prevent problems from cropping up.
 ```sh
 git clone git@code.westga.edu:puppet-config/puppet-master.git  
 cd puppet-master
+```
 
-# bring machines up in order one at a time
+### The Foreman (ENC, CA, and report processor)
 
-# Puppet Master
-vagrant up pm
+```sh 
+vagrant up foreman 
+```
 
-# PuppetDB
-vagrant up puppetdb
-# from host computer, go to http://127.0.0.1:8080 and make sure a dashboad shows up
+From host computer, go to http://127.0.0.1:8081 and log in the name and password 
+output by the installer. Change the admin password to something that can be remembered.
 
-# The Foreman (ENC and report processor)
-vagrant up foreman
+```sh
 vagrant ssh foreman
 sudo -s
-/root/foreman.sh #actually installs foreman
-
-# fix puppet agent setup
-puppet apply /vagrant/scripts/bootstrap-agent-install.pp
-
-# from host computer, go to http://127.0.0.1:8081 and log in the name and password output by the installer
-# change the admin password to something that can be remembered.
-
-# configure foreman-proxy for pm <--> foreman communication
-vagrant ssh pm
-sudo -s
-puppet module install theforeman-foreman_proxy
-# insert configuration of this module here...
-sh /vagrant/scripts/post-flight.sh
+puppet cert generate pm.localdomain"
+cp /var/lib/puppet/ssl/certs/ca.pem /vagrant/scripts/ssl/certs/"
+for d in certs private_keys public_keys; do cp -f /var/lib/puppet/ssl/$d/pm.localdomain.pem /vagrant/scripts/ssl/$d/; done
 ```
+
+### Update Vagrantfile for this install
+
+Use the oauth_consumer_key / oauth_consumer_secret from Forman Settings -> Auth as the 
+last two entries in the installer. This auto-registers the Puppet Master with Foreman.
+
+### Puppet Master
+```sh
+vagrant up pm
+```
+
+### PuppetDB
+```sh
+vagrant up puppetdb
+```
+
+At this point you need to go into The Foreman and apply `puppetlabs-puppetdb` to puppetdb.localdomain.
+Be sure that `listen_address` and `ssl_listen_address` are set to use the proper adderess if 0.0.0.0 is
+not what you want. I suggest setting this in Hiera. After this run:
+
+```sh
+puppet agent -t # setups up PuppetDB via the assigned modules
+```
+
+From your computer, go to http://127.0.0.1:8080 and make sure a dashboard shows up. Once it does,
+go back to Foreman and add the `puppetdb::master::config` module with the following settings:
+
+```yml
+puppetdb_server: puppetdb.localdomain
+puppet_service_name: httpd
+```
+
+Once those settings apply successfully you will need to go back over to pm.localdomain and run:
+
+```sh
+puppet apply /vagrant/scripts/bootstrap-master-2.pp
+```
+
+This makes the Puppet Master use PuppetDB for stored configs and as a report processor.
 
 ## Installing on a vSphere VM
 

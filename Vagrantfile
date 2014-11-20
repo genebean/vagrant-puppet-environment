@@ -19,16 +19,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 	foreman.vm.provision "shell", inline: "foreman-installer --foreman-repo=stable  --foreman-passenger-interface='' \
 	  --foreman-locations-enabled=true --foreman-initial-location=Staging --enable-foreman-compute-vmware --enable-foreman-plugin-bootdisk \
 	  --enable-foreman-plugin-default-hostgroup --enable-foreman-plugin-discovery --enable-foreman-plugin-hooks \
-	  --enable-foreman-plugin-puppetdb --enable-foreman-plugin-setup --enable-foreman-plugin-tasks"
+	  --enable-foreman-plugin-puppetdb --enable-foreman-plugin-setup --enable-foreman-plugin-tasks "
+#	  --foreman-foreman-url='https://foreman.westga.edu' --foreman-passenger-interface=eth1"
 
     foreman.vm.provision "shell", inline: "echo '*.localdomain' > /etc/puppet/autosign.conf"
     foreman.vm.provision "shell", inline: "puppet apply /vagrant/scripts/local-hosts.pp"
-    foreman.vm.provision "shell", inline: "puppet cert generate pm.localdomain"
-    foreman.vm.provision "shell", inline: "cp -f /var/lib/puppet/ssl/certs/ca.pem /vagrant/scripts/ssl/certs/"
-	foreman.vm.provision "shell", inline: "for d in certs private_keys public_keys; do cp -f /var/lib/puppet/ssl/$d/pm.localdomain.pem /vagrant/scripts/ssl/$d/; done"
 
-#    foreman.vm.provision "shell", inline: "puppet module install theforeman-puppet"
-#    foreman.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-agent-install.pp"
+    foreman.vm.provision "shell", inline: "puppet module install theforeman-puppet"
+    foreman.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-agent-install.pp"
 
     foreman.vm.network "private_network", ip: "172.28.128.22"
     foreman.vm.network "forwarded_port", guest: 80,  host: 8082
@@ -44,7 +42,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 	pm.vm.provision "shell", inline: "yum -y install http://yum.theforeman.org/releases/1.6/el6/x86_64/foreman-release.rpm"
 	pm.vm.provision "shell", inline: "yum -y install foreman-installer"
 	pm.vm.provision "shell", inline: "mkdir -p /var/lib/puppet/ssl/{certs,private_keys,public_keys}"
-    pm.vm.provision "shell", inline: "cp -f /vagrant/scripts/ssl/certs/ca.pem /var/lib/puppet/ssl/certs/"
+    pm.vm.provision "shell", inline: "cp /vagrant/scripts/ssl/certs/ca.pem /var/lib/puppet/ssl/certs/"
 	pm.vm.provision "shell", inline: "for d in certs private_keys public_keys; do cp /vagrant/scripts/ssl/$d/pm.localdomain.pem /var/lib/puppet/ssl/$d/; done"
 	pm.vm.provision "shell", path:   "scripts/puppet.sh"
     pm.vm.provision "shell", inline: "puppet apply /vagrant/scripts/local-hosts.pp"
@@ -62,18 +60,16 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       --foreman-proxy-tftp=false \
       --foreman-proxy-foreman-base-url=https://foreman.localdomain \
       --foreman-proxy-trusted-hosts=foreman.localdomain \
-      --foreman-proxy-oauth-consumer-key=z5uEgpDZ8XnV3pad3KXTgwecj8cW6S7Q \
-	  --foreman-proxy-oauth-consumer-secret=Y9ULnDXSJ2r4hFXZ93o8M4atjsDwa9cU"
-
-#	
-#    pm.vm.provision "shell", inline: "puppet module install theforeman-puppet"
-#    pm.vm.provision "shell", path:   "scripts/copy-files.sh"
-#    pm.vm.provision "shell", path:   "scripts/hieradata.sh"
-#    pm.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-master-1.pp"
-#    pm.vm.provision "shell", path:   "scripts/r10k-module.sh"
-#    pm.vm.provision "shell", inline: "puppet apply /vagrant/scripts/r10k_installation.pp --test --verbose; echo 'Finished installing r10k.'"
-#    #pm.vm.provision "shell", inline: "cd /etc/puppet; sudo -u puppet -H r10k deploy environment -pv"
-#    #pm.vm.provision "shell", inline: "puppet module install theforeman-foreman_proxy"
+      --foreman-proxy-oauth-consumer-key=YourKeyHere \
+	  --foreman-proxy-oauth-consumer-secret=YourSecretHere"
+	
+    pm.vm.provision "shell", inline: "puppet module install theforeman-puppet"
+    pm.vm.provision "shell", path:   "scripts/copy-files.sh"
+    pm.vm.provision "shell", path:   "scripts/hieradata.sh"
+    pm.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-master-1.pp"
+    pm.vm.provision "shell", path:   "scripts/r10k-module.sh"
+    pm.vm.provision "shell", inline: "puppet apply /vagrant/scripts/r10k_installation.pp --test --verbose; echo 'Finished installing r10k.'"
+    pm.vm.provision "shell", inline: "cd /etc/puppet; sudo -u puppet -H r10k deploy environment -pv"
 
     pm.vm.network "private_network", ip: "172.28.128.20"
   end
@@ -109,6 +105,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   
     client.vm.network "private_network", ip: "172.28.128.23"
   end
+  
 
   config.vm.provider "vmware_desktop" do |v|
     v.gui = false

@@ -8,9 +8,12 @@ file { '/var/cache/r10k':
 }
 
 class { 'r10k':
-  manage_modulepath => false,
-  purgedirs         => ["${::settings::confdir}/environments"],
-  sources           => {
+  configfile                => '/etc/puppet/r10k.yaml',
+  configfile_symlink        => '/etc/r10k.yaml',
+  manage_configfile_symlink => true,
+  manage_modulepath         => false,
+  purgedirs                 => ["${::settings::confdir}/environments"],
+  sources                   => {
     'gitlab' => {
       'remote'  => 'git@code.westga.edu:puppet-config/puppet-environments.git',
       'basedir' => "${::settings::confdir}/environments",
