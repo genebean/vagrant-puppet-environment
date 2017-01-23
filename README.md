@@ -19,7 +19,7 @@ This repo has everything needed to setup a Puppet Master including the files nee
 
 To fully use the development environment you will need to have [Vagrant] and [Git]
 installed. The first time you run `vagrant up` it will take a few minutes to download
-the [box] (virtual machine template). This is a one-time thing. The box specified in 
+the [box] (virtual machine template). This is a one-time thing. The box specified in
 the Vagrantfile supports [Virtualbox], [VMware Workstation], and [VMware Fusion].
 
 The setps below need to be followed in order to prevent problems from cropping up.
@@ -30,24 +30,24 @@ cd puppet-master
 
 ### The Foreman (ENC, CA, and report processor)
 
-```sh 
-vagrant up foreman 
+```sh
+vagrant up foreman
 ```
 
-From host computer, go to http://127.0.0.1:8081 and log in the name and password 
+From host computer, go to https://127.0.0.1:8443 and log in the name and password
 output by the installer. Change the admin password to something that can be remembered.
 
 ```sh
 vagrant ssh foreman
 sudo -s
-puppet cert generate pm.localdomain"
-cp /var/lib/puppet/ssl/certs/ca.pem /vagrant/scripts/ssl/certs/"
+puppet cert generate pm.localdomain
+cp /var/lib/puppet/ssl/certs/ca.pem /vagrant/scripts/ssl/certs/
 for d in certs private_keys public_keys; do cp -f /var/lib/puppet/ssl/$d/pm.localdomain.pem /vagrant/scripts/ssl/$d/; done
 ```
 
 ### Update Vagrantfile for this install
 
-Use the oauth_consumer_key / oauth_consumer_secret from Forman Settings -> Auth as the 
+Use the oauth_consumer_key / oauth_consumer_secret from Forman Settings -> Auth as the
 last two entries in the installer. This auto-registers the Puppet Master with Foreman.
 
 ### Puppet Master
@@ -116,4 +116,3 @@ other open source projects:
 [Virtualbox]:https://www.virtualbox.org/wiki/Downloads
 [VMware Fusion]:http://www.vmware.com/products/fusion/
 [VMware Workstation]:http://www.vmware.com/products/workstation/
-
