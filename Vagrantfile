@@ -57,10 +57,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # foreman.vm.provision "shell", inline: "cd /etc/puppet; sudo -u puppet -H r10k deploy environment -pv"
 
     foreman.vm.network "private_network", ip: "172.28.128.22"
-    foreman.vm.network "forwarded_port", guest: 80,  host: 8082
-    foreman.vm.network "forwarded_port", guest: 443, host: 8443
-    foreman.vm.network "forwarded_port", guest: 8080, host: 8080
-    foreman.vm.network "forwarded_port", guest: 8081, host: 8081
+    
     foreman.vm.provider :virtualbox do |vb|
           vb.customize ["modifyvm", :id, "--memory", "2048"]
           vb.customize ["modifyvm", :id, "--cpus", "2"]
@@ -72,12 +69,16 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     proxy.vm.hostname = "proxy.localdomain"
 
     proxy.vm.provision "shell", inline: "systemctl restart network"
-  	proxy.vm.provision "shell", inline: "yum -y install nginx"
     proxy.vm.provision "shell", inline: "puppet apply /vagrant/scripts/local-hosts.pp"
     proxy.vm.provision "shell", inline: "puppet module install theforeman-puppet"
+    proxy.vm.provision "shell", inline: "puppet module install puppetlabs-haproxy"
+    proxy.vm.provision "shell", inline: "puppet apply /vagrant/scripts/proxy.pp"
     proxy.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-agent-install.pp"
 
     proxy.vm.network "private_network", ip: "172.28.128.20"
+    proxy.vm.network "forwarded_port", guest: 443, host: 8443
+    proxy.vm.network "forwarded_port", guest: 8081, host: 8081
+    proxy.vm.network "forwarded_port", guest: 9000, host: 9000
   end
 
   config.vm.define "client" do |client|

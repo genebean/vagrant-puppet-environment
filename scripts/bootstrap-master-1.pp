@@ -5,6 +5,7 @@ class { '::puppet':
   pluginsync                    => true,
   runmode                       => 'service',
   ca_server                     => 'foreman.localdomain',
+  dns_alt_names                 => [ 'puppet', 'puppet.localdomain', ],
   #dns_alt_names                 => [ 'puppet', 'puppet.westga.edu', 'puppet.uwg.westga.edu',
   #                                   'puppet01.westga.edu', 'puppet01.uwg.westga.edu',
   #                                   'puppet02.westga.edu', 'puppet02.uwg.westga.edu'
