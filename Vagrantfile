@@ -45,19 +45,18 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     foreman.vm.provision "shell", inline: "puppet module install theforeman-puppet"
     foreman.vm.provision "shell", inline: "puppet module install theforeman-foreman"
     foreman.vm.provision "shell", inline: "puppet module install puppetlabs-puppetdb"
+    foreman.vm.provision "shell", inline: "puppet module install puppet-r10k"
     foreman.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-master-1.pp"
-    foreman.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-master-2.pp"
-
-    # TODO: Hiera and r10k setup
-    # foreman.vm.provision "shell", path:   "scripts/copy-files.sh"
-    # foreman.vm.provision "shell", path:   "scripts/hieradata.sh"
-    # foreman.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-master-1.pp"
-    # foreman.vm.provision "shell", path:   "scripts/r10k-module.sh"
+    foreman.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-master-2.pp" # starts using PuppetDB
+    foreman.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-master-3.pp" # adds r10k
+    foreman.vm.provision "shell", inline: "/usr/bin/r10k deploy environment --puppetfile --verbose"
     # foreman.vm.provision "shell", inline: "puppet apply /vagrant/scripts/r10k_installation.pp --test --verbose; echo 'Finished installing r10k.'"
-    # foreman.vm.provision "shell", inline: "cd /etc/puppet; sudo -u puppet -H r10k deploy environment -pv"
+
+    # TODO: Hiera
+    # TODO: WebHook listener
 
     foreman.vm.network "private_network", ip: "172.28.128.22"
-    
+
     foreman.vm.provider :virtualbox do |vb|
           vb.customize ["modifyvm", :id, "--memory", "2048"]
           vb.customize ["modifyvm", :id, "--cpus", "2"]
