@@ -5,6 +5,7 @@ class { '::puppet':
   pluginsync                    => true,
   runmode                       => 'service',
   ca_server                     => 'foreman.localdomain',
+  dns_alt_names                 => [ 'puppet', 'puppet.localdomain', ],
 
   agent                         => true,
   puppetmaster                  => 'foreman.localdomain',
