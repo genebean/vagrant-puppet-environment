@@ -21,7 +21,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   	foreman.vm.provision "shell", inline: "rpm -ivh --replacepkgs https://yum.theforeman.org/releases/1.14/el7/x86_64/foreman-release.rpm"
   	foreman.vm.provision "shell", inline: "yum -y install foreman-installer"
 
-    # --foreman-foreman-url='https://foreman.westga.edu' --foreman-passenger-interface=eth1
+    # --foreman-foreman-url='https://enc.localdomain' --foreman-passenger-interface=eth1
     # --foreman-server-ssl-cert --foreman-server-ssl-chain --foreman-server-ssl-key Defines Apache mod_ssl cert files.
   	foreman.vm.provision "shell", inline: <<-EOF
       until foreman-installer --foreman-admin-password='password' \
@@ -50,9 +50,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     foreman.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-master-2.pp" # starts using PuppetDB
     foreman.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-master-3.pp" # adds r10k
     foreman.vm.provision "shell", inline: "/usr/bin/r10k deploy environment --puppetfile --verbose"
-    # foreman.vm.provision "shell", inline: "puppet apply /vagrant/scripts/r10k_installation.pp --test --verbose; echo 'Finished installing r10k.'"
+    foreman.vm.provision "shell", inline: "puppet agent -t || echo 'sleeping for a minute and trying again...'; sleep 60; puppet agent -t"
 
-    # TODO: Hiera
     # TODO: WebHook listener
 
     foreman.vm.network "private_network", ip: "172.28.128.22"
@@ -73,6 +72,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     proxy.vm.provision "shell", inline: "puppet module install puppetlabs-haproxy"
     proxy.vm.provision "shell", inline: "puppet apply /vagrant/scripts/proxy.pp"
     proxy.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-agent-install.pp"
+    proxy.vm.provision "shell", inline: "rm -rf /etc/puppetlabs/code/environments/production/modules/*"
+    proxy.vm.provision "shell", inline: "puppet agent -t || echo 'sleeping for a minute and trying again...'; sleep 60; puppet agent -t"
 
     proxy.vm.network "private_network", ip: "172.28.128.20"
     proxy.vm.network "forwarded_port", guest: 443, host: 8443
@@ -87,6 +88,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     client.vm.provision "shell", inline: "puppet apply /vagrant/scripts/local-hosts.pp"
     client.vm.provision "shell", inline: "puppet module install theforeman-puppet"
     client.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-agent-install.pp"
+    client.vm.provision "shell", inline: "rm -rf /etc/puppetlabs/code/environments/production/modules/*"
+    client.vm.provision "shell", inline: "puppet agent -t || echo 'sleeping for a minute and trying again...'; sleep 60; puppet agent -t"
 
     client.vm.network "private_network", ip: "172.28.128.23"
   end
