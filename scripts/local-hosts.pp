@@ -4,7 +4,7 @@ Package {  allow_virtual => true, }
 host { 'localhost':
   ip           => '127.0.0.1',
   host_aliases => [ $::hostname,
-                    'localhost', 'localhost.localdomain',
+                    'localhost.localdomain',
                     'localhost4', 'localhost4.localdomain4' ],
 }
 
