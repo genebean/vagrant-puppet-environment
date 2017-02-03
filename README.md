@@ -1,94 +1,49 @@
-# UWG Puppet Master Repo
+# Puppet Master Repo
 
-This repo has everything needed to setup a Puppet Master including the files needed to run one in Vagrant.
+This repo has everything needed to setup a Puppet environment in Vagrant. It
+includes all the components that make up a complete system including load
+balancer, Puppet Server, PuppetDB, Foreman, r10k, and PostgreSQL. It also
+pulls down a sample control repo for Hiera, roles, and profiles.
+
 
 ## Version
 
-0.2 - Redo based on Foreman 1.6
-0.1 - Design phase
+2.0 - Redo for Puppet 4  
+0.2 - Redo based on Foreman 1.6  
+0.1 - Design phase  
 
-### ToDo List:
-
-1. Implement a method to keep the Hiera data up-to-date (vcsrepo module)
-2. Automate foreman-proxy setup
-3. When does r10k get run on pm? (via provided web hook... need to set this up still)
-4. Implement the eyaml backend for Hiera and move sensitive data into it.
-5. Design a method for EApps / Web Team people to author data
 
 ## Installing for development / testing
 
 To fully use the development environment you will need to have [Vagrant] and [Git]
 installed. The first time you run `vagrant up` it will take a few minutes to download
 the [box] (virtual machine template). This is a one-time thing. The box specified in
-the Vagrantfile supports [Virtualbox], [VMware Workstation], and [VMware Fusion].
+the Vagrantfile only supports [Virtualbox].
 
-The setps below need to be followed in order to prevent problems from cropping up.
-```sh
-git clone git@code.westga.edu:puppet-config/puppet-master.git  
-cd puppet-master
-```
 
-### The Foreman (ENC, CA, and report processor)
+### Running this environment
 
 ```sh
-vagrant up foreman
+cd [the location you cloned this repo]
+vagrant up
 ```
 
-From host computer, go to https://127.0.0.1:8443 and log in the name and password
-output by the installer. Change the admin password to something that can be remembered.
+ Once the setup is complete you will have an instance of [HAProxy]
+ that fronts the web interface of Foreman. It also provides a metrics page for
+ monitoring HAProxy's performance. The Foreman server will also be running
+ Puppet Server and PuppetDB. PuppetDB's dashboard can be accessed from inside
+ Foreman by going to `Monitor --> PuppetDB Dashboard`
 
-```sh
-vagrant ssh foreman
-sudo -s
-puppet cert generate pm.localdomain
-cp /var/lib/puppet/ssl/certs/ca.pem /vagrant/scripts/ssl/certs/
-for d in certs private_keys public_keys; do cp -f /var/lib/puppet/ssl/$d/pm.localdomain.pem /vagrant/scripts/ssl/$d/; done
-```
+ **URL's:**
 
-### Update Vagrantfile for this install
+ * *Foreman:* https://127.0.0.1:8443 user: `admin` password: `password`
+ * *HAProxy Metrics:* http://127.0.0.1:9000 user: `admin` password: `password`
 
-Use the oauth_consumer_key / oauth_consumer_secret from Forman Settings -> Auth as the
-last two entries in the installer. This auto-registers the Puppet Master with Foreman.
+**Note:**
 
-### Puppet Master
-```sh
-vagrant up pm
-```
-
-### PuppetDB
-```sh
-vagrant up puppetdb
-```
-
-At this point you need to go into The Foreman and apply `puppetlabs-puppetdb` to puppetdb.localdomain.
-Be sure that `listen_address` and `ssl_listen_address` are set to use the proper adderess if 0.0.0.0 is
-not what you want. I suggest setting this in Hiera. After this run:
-
-```sh
-puppet agent -t # setups up PuppetDB via the assigned modules
-```
-
-From your computer, go to http://127.0.0.1:8080 and make sure a dashboard shows up. Once it does,
-go back to Foreman and add the `puppetdb::master::config` module with the following settings:
-
-```yml
-puppetdb_server: puppetdb.localdomain
-puppet_service_name: httpd
-```
-
-Once those settings apply successfully you will need to go back over to pm.localdomain and run:
-
-```sh
-puppet apply /vagrant/scripts/bootstrap-master-2.pp
-```
-
-This makes the Puppet Master use PuppetDB for stored configs and as a report processor.
-
-## Installing on a vSphere VM
-
-```sh
-TODO: document this...
-```
+One thing of note is that the `site.pp` file in the control repo is used to
+do the node classification during setup and will be applying settings
+_outside_ of Foreman.
 
 ## Tech
 
@@ -97,7 +52,8 @@ other open source projects:
 
 * [Foreman] - a complete lifecycle management tool for physical and virtual servers.
 * [Git] - version control
-* [Puppet] - automated configuration managment.
+* [HAProxy] - a load balancer
+* [Puppet] - automated configuration management.
 * [PuppetDB] - a data warehouse for Puppet.
 * [Puppet Forge] - a central repo for Puppet modules
 * [r10k] - a tool for deploying Puppet Environments
@@ -108,6 +64,7 @@ other open source projects:
 [box]:https://vagrantcloud.com/genebean/centos6-64bit
 [Foreman]:http://theforeman.org/
 [Git]:http://git-scm.com/
+[HAProxy]:http://www.haproxy.org/
 [Puppet]:http://docs.puppetlabs.com/guides/install_puppet/pre_install.html
 [PuppetDB]:https://docs.puppetlabs.com/puppetdb/
 [Puppet Forge]:https://forge.puppetlabs.com/
