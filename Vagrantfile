@@ -76,8 +76,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     proxy.vm.provision "shell", inline: "puppet agent -t || echo 'sleeping for a minute and trying again...'; sleep 60; puppet agent -t"
 
     proxy.vm.network "private_network", ip: "172.28.128.20"
-    proxy.vm.network "forwarded_port", guest: 443, host: 8443
+    proxy.vm.network "forwarded_port", guest:  443, host: 8443
     proxy.vm.network "forwarded_port", guest: 8081, host: 8081
+    proxy.vm.network "forwarded_port", guest: 8888, host: 8888
     proxy.vm.network "forwarded_port", guest: 9000, host: 9000
   end
 
