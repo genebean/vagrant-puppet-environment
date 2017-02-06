@@ -32,7 +32,9 @@ vagrant up
  that fronts the web interface of Foreman. It also provides a metrics page for
  monitoring HAProxy's performance. The Foreman server will also be running
  Puppet Server and PuppetDB. PuppetDB's dashboard can be accessed from inside
- Foreman by going to `Monitor --> PuppetDB Dashboard`
+ Foreman by going to `Monitor --> PuppetDB Dashboard`. In addition to this, you
+ will have a webhook receiver listening on port `8888` by way of
+ [genebean/puppetmaster_webhook] that can be used to trigger r10k.
 
  **URL's:**
 
@@ -63,6 +65,7 @@ other open source projects:
 
 [box]:https://vagrantcloud.com/genebean/centos6-64bit
 [Foreman]:http://theforeman.org/
+[genebean/puppetmaster_webhook]:https://forge.puppet.com/genebean/puppetmaster_webhook
 [Git]:http://git-scm.com/
 [HAProxy]:http://www.haproxy.org/
 [Puppet]:http://docs.puppetlabs.com/guides/install_puppet/pre_install.html
