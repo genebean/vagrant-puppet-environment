@@ -5,112 +5,101 @@
 VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  config.vm.box = "genebean/centos6-64bit"  
+  config.vm.box = "genebean/centos-7-puppet-agent"
 
-  
+  if Vagrant.has_plugin?("vagrant-cachier")
+    # Configure cached packages to be shared between instances of the same base box.
+    # More info on http://fgrehm.viewdocs.io/vagrant-cachier/usage
+    config.cache.scope = :box
+  end
+
   config.vm.define "foreman" do |foreman|
     foreman.vm.hostname = "foreman.localdomain"
 
-	foreman.vm.provision "shell", inline: "yum clean all"
-	foreman.vm.provision "shell", inline: "yum -y install http://yum.puppetlabs.com/puppetlabs-release-el-6.noarch.rpm"
-	foreman.vm.provision "shell", inline: "yum -y install http://yum.theforeman.org/releases/latest/el6/x86_64/foreman-release.rpm"
-	foreman.vm.provision "shell", inline: "yum -y install foreman-installer"
-	
-	foreman.vm.provision "shell", inline: "foreman-installer --foreman-repo=stable  --foreman-passenger-interface='' \
-	  --foreman-locations-enabled=true --foreman-initial-location=Staging --enable-foreman-compute-vmware --enable-foreman-plugin-bootdisk \
-	  --enable-foreman-plugin-default-hostgroup --enable-foreman-plugin-discovery --enable-foreman-plugin-hooks \
-	  --enable-foreman-plugin-puppetdb --enable-foreman-plugin-setup --enable-foreman-plugin-tasks "
-#	  --foreman-foreman-url='https://foreman.westga.edu' --foreman-passenger-interface=eth1"
+    foreman.vm.provision "shell", inline: "systemctl restart network"
+  	foreman.vm.provision "shell", inline: "yum clean all"
+  	foreman.vm.provision "shell", inline: "rpm -ivh --replacepkgs https://yum.theforeman.org/releases/1.14/el7/x86_64/foreman-release.rpm"
+  	foreman.vm.provision "shell", inline: "yum -y install foreman-installer"
 
-    foreman.vm.provision "shell", inline: "echo '*.localdomain' > /etc/puppet/autosign.conf"
+    # --foreman-foreman-url='https://enc.localdomain' --foreman-passenger-interface=eth1
+    # --foreman-server-ssl-cert --foreman-server-ssl-chain --foreman-server-ssl-key Defines Apache mod_ssl cert files.
+  	foreman.vm.provision "shell", inline: <<-EOF
+      until foreman-installer --foreman-admin-password='password' \
+        --puppet-server-implementation='puppetserver' \
+        --puppet-server-jvm-max-heap-size='768m' --puppet-server-jvm-min-heap-size='768m' \
+        --enable-foreman-compute-vmware --enable-foreman-plugin-bootdisk \
+    	  --enable-foreman-plugin-default-hostgroup --enable-foreman-plugin-hooks \
+        --enable-foreman-plugin-setup --enable-foreman-plugin-tasks \
+    	  --enable-foreman-plugin-puppetdb \
+        --foreman-plugin-puppetdb-address='https://localhost:8081/pdb/cmd/v1' \
+        --foreman-plugin-puppetdb-dashboard-address='http://localhost:8080/pdb/dashboard' \
+        --foreman-proxy-realm=false
+      do
+        echo 'Foreman install failed, running it again.'
+      done
+    EOF
+
+    foreman.vm.provision "shell", inline: "echo '*.localdomain' > /etc/puppetlabs/puppet/autosign.conf"
     foreman.vm.provision "shell", inline: "puppet apply /vagrant/scripts/local-hosts.pp"
 
     foreman.vm.provision "shell", inline: "puppet module install theforeman-puppet"
-    foreman.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-agent-install.pp"
+    foreman.vm.provision "shell", inline: "puppet module install theforeman-foreman"
+    foreman.vm.provision "shell", inline: "puppet module install puppetlabs-puppetdb"
+    foreman.vm.provision "shell", inline: "puppet module install puppet-r10k"
+    foreman.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-master-1.pp"
+    foreman.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-master-2.pp" # starts using PuppetDB
+    foreman.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-master-3.pp" # adds r10k
+    foreman.vm.provision "shell", inline: "/usr/bin/r10k deploy environment --puppetfile --verbose"
+    foreman.vm.provision "shell", inline: "puppet agent -t || echo 'sleeping for a minute and trying again...'; sleep 60; puppet agent -t"
+
+    # TODO: WebHook listener
 
     foreman.vm.network "private_network", ip: "172.28.128.22"
-    foreman.vm.network "forwarded_port", guest: 80,  host: 8082
-    foreman.vm.network "forwarded_port", guest: 443, host: 8443
-  end
-  
-  
-  config.vm.define "pm" do |pm|
-    pm.vm.hostname = "pm.localdomain"
 
-	pm.vm.provision "shell", inline: "yum clean all"
-	pm.vm.provision "shell", inline: "yum -y install http://yum.puppetlabs.com/puppetlabs-release-el-6.noarch.rpm"
-	pm.vm.provision "shell", inline: "yum -y install http://yum.theforeman.org/releases/1.6/el6/x86_64/foreman-release.rpm"
-	pm.vm.provision "shell", inline: "yum -y install foreman-installer"
-	pm.vm.provision "shell", inline: "mkdir -p /var/lib/puppet/ssl/{certs,private_keys,public_keys}"
-    pm.vm.provision "shell", inline: "cp /vagrant/scripts/ssl/certs/ca.pem /var/lib/puppet/ssl/certs/"
-	pm.vm.provision "shell", inline: "for d in certs private_keys public_keys; do cp /vagrant/scripts/ssl/$d/pm.localdomain.pem /var/lib/puppet/ssl/$d/; done"
-	pm.vm.provision "shell", path:   "scripts/puppet.sh"
-    pm.vm.provision "shell", inline: "puppet apply /vagrant/scripts/local-hosts.pp"
-	pm.vm.provision "shell", inline: "foreman-installer \
-      --no-enable-foreman \
-      --no-enable-foreman-cli \
-      --no-enable-foreman-plugin-bootdisk \
-      --no-enable-foreman-plugin-setup \
-      --enable-puppet \
-      --puppet-server-ca=false \
-	  --puppet-ca-server=foreman.localdomain \
-      --puppet-server-foreman-url=https://foreman.localdomain \
-      --enable-foreman-proxy \
-      --foreman-proxy-puppetca=false \
-      --foreman-proxy-tftp=false \
-      --foreman-proxy-foreman-base-url=https://foreman.localdomain \
-      --foreman-proxy-trusted-hosts=foreman.localdomain \
-      --foreman-proxy-oauth-consumer-key=YourKeyHere \
-	  --foreman-proxy-oauth-consumer-secret=YourSecretHere"
-	
-    pm.vm.provision "shell", inline: "puppet module install theforeman-puppet"
-    pm.vm.provision "shell", path:   "scripts/copy-files.sh"
-    pm.vm.provision "shell", path:   "scripts/hieradata.sh"
-    pm.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-master-1.pp"
-    pm.vm.provision "shell", path:   "scripts/r10k-module.sh"
-    pm.vm.provision "shell", inline: "puppet apply /vagrant/scripts/r10k_installation.pp --test --verbose; echo 'Finished installing r10k.'"
-    pm.vm.provision "shell", inline: "cd /etc/puppet; sudo -u puppet -H r10k deploy environment -pv"
-
-    pm.vm.network "private_network", ip: "172.28.128.20"
+    foreman.vm.provider :virtualbox do |vb|
+          vb.customize ["modifyvm", :id, "--memory", "2048"]
+          vb.customize ["modifyvm", :id, "--cpus", "2"]
+      end
   end
 
-  
-  config.vm.define "puppetdb" do |puppetdb|
-    puppetdb.vm.hostname = "puppetdb.localdomain"
 
-    puppetdb.vm.provision "shell", path:   "scripts/puppet.sh"
-    puppetdb.vm.provision "shell", inline: "puppet apply /vagrant/scripts/local-hosts.pp"
-    puppetdb.vm.provision "shell", inline: "puppet module install theforeman-puppet"
-    puppetdb.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-agent-install.pp"
-    puppetdb.vm.provision "shell", inline: "echo 'sleeping for a minute...'; sleep 60"
-    puppetdb.vm.provision "shell", inline: "puppet agent -t --waitforcert 120"
-#    puppetdb.vm.provision "shell", inline: "puppet module install puppetlabs-puppetdb"
-#    puppetdb.vm.provision "shell", inline: "puppet apply /vagrant/scripts/puppetdb.pp"
- 
-    puppetdb.vm.network "private_network", ip: "172.28.128.21"
-    puppetdb.vm.network "forwarded_port", guest: 8080, host: 8080
-    puppetdb.vm.network "forwarded_port", guest: 8081, host: 8081
+  config.vm.define "proxy" do |proxy|
+    proxy.vm.hostname = "proxy.localdomain"
+
+    proxy.vm.provision "shell", inline: "systemctl restart network"
+    proxy.vm.provision "shell", inline: "puppet apply /vagrant/scripts/local-hosts.pp"
+    proxy.vm.provision "shell", inline: "puppet module install theforeman-puppet"
+    proxy.vm.provision "shell", inline: "puppet module install puppetlabs-haproxy"
+    proxy.vm.provision "shell", inline: "puppet apply /vagrant/scripts/proxy.pp"
+    proxy.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-agent-install.pp"
+    proxy.vm.provision "shell", inline: "rm -rf /etc/puppetlabs/code/environments/production/modules/*"
+    proxy.vm.provision "shell", inline: "puppet agent -t || echo 'sleeping for a minute and trying again...'; sleep 60; puppet agent -t"
+
+    proxy.vm.network "private_network", ip: "172.28.128.20"
+    proxy.vm.network "forwarded_port", guest:  443, host: 8443
+    proxy.vm.network "forwarded_port", guest: 8081, host: 8081
+    proxy.vm.network "forwarded_port", guest: 8888, host: 8888
+    proxy.vm.network "forwarded_port", guest: 9000, host: 9000
   end
 
-  
   config.vm.define "client" do |client|
     client.vm.hostname = "client.localdomain"
 
-	client.vm.provision "shell", inline: "yum clean all"
-	client.vm.provision "shell", inline: "yum -y install http://yum.puppetlabs.com/puppetlabs-release-el-6.noarch.rpm"
-    client.vm.provision "shell", path:   "scripts/puppet.sh"
+    client.vm.provision "shell", inline: "systemctl restart network"
     client.vm.provision "shell", inline: "puppet apply /vagrant/scripts/local-hosts.pp"
     client.vm.provision "shell", inline: "puppet module install theforeman-puppet"
     client.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-agent-install.pp"
-  
+    client.vm.provision "shell", inline: "rm -rf /etc/puppetlabs/code/environments/production/modules/*"
+    client.vm.provision "shell", inline: "puppet agent -t || echo 'sleeping for a minute and trying again...'; sleep 60; puppet agent -t"
+
     client.vm.network "private_network", ip: "172.28.128.23"
   end
-  
+
 
   config.vm.provider "vmware_desktop" do |v|
     v.gui = false
   end
-  
+
   config.vm.provider "vmware_fusion" do |v|
     v.gui = false
   end
@@ -119,8 +108,4 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     v.gui = false
   end
 
-  # Create a forwarded port mapping which allows access to a specific port
-  # within the machine from a port on the host machine. In the example below,
-  # accessing "localhost:8080" will access port 80 on the guest machine.
-  # config.vm.network "forwarded_port", guest: 80, host: 8080
 end
