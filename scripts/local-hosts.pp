@@ -9,7 +9,7 @@ host { 'localhost':
 }
 
 host { 'proxy.localdomain':
-  ip           => '172.28.128.20',
+  ip           => '172.28.128.10',
   host_aliases => [
     'puppet',
     'puppet.localdomain',
@@ -17,6 +17,14 @@ host { 'proxy.localdomain':
 }
 
 host { 'foreman.localdomain':
+  ip => '172.28.128.20',
+}
+
+host { 'pg1.localdomain':
+  ip => '172.28.128.21',
+}
+
+host { 'pg2.localdomain':
   ip => '172.28.128.22',
 }
 

@@ -13,6 +13,18 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.cache.scope = :box
   end
 
+  config.vm.define "pg1" do |pg1|
+    pg1.vm.hostname = "pg1.localdomain"
+
+    pg1.vm.provision "shell", inline: "systemctl restart network"
+  	pg1.vm.provision "shell", inline: "yum clean all"
+    pg1.vm.provision "shell", inline: "puppet apply /vagrant/scripts/local-hosts.pp"
+    pg1.vm.provision "shell", inline: "puppet module install puppetlabs-puppetdb"
+    #pg1.vm.provision "shell", inline: "puppet module install puppetlabs-postgresql"
+
+    pg1.vm.network "private_network", ip: "172.28.128.21"
+  end
+
   config.vm.define "foreman" do |foreman|
     foreman.vm.hostname = "foreman.localdomain"
 
@@ -52,9 +64,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     foreman.vm.provision "shell", inline: "/usr/bin/r10k deploy environment --puppetfile --verbose"
     foreman.vm.provision "shell", inline: "puppet agent -t || echo 'sleeping for a minute and trying again...'; sleep 60; puppet agent -t"
 
-    # TODO: WebHook listener
-
-    foreman.vm.network "private_network", ip: "172.28.128.22"
+    foreman.vm.network "private_network", ip: "172.28.128.20"
 
     foreman.vm.provider :virtualbox do |vb|
           vb.customize ["modifyvm", :id, "--memory", "2048"]
@@ -75,7 +85,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     proxy.vm.provision "shell", inline: "rm -rf /etc/puppetlabs/code/environments/production/modules/*"
     proxy.vm.provision "shell", inline: "puppet agent -t || echo 'sleeping for a minute and trying again...'; sleep 60; puppet agent -t"
 
-    proxy.vm.network "private_network", ip: "172.28.128.20"
+    proxy.vm.network "private_network", ip: "172.28.128.10"
     proxy.vm.network "forwarded_port", guest:  443, host: 8443
     proxy.vm.network "forwarded_port", guest: 8081, host: 8081
     proxy.vm.network "forwarded_port", guest: 8888, host: 8888
