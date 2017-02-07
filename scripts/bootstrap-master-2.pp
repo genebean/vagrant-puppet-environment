@@ -15,7 +15,7 @@ class { '::puppet':
   server_implementation         => 'puppetserver',
   server_jvm_max_heap_size      => '768m',
   server_jvm_min_heap_size      => '768m',
-  server_reports                => 'foreman,puppetdb',
+  server_reports                => 'foreman',
   server_external_nodes         => '/etc/puppetlabs/puppet/node.rb',
   server_dynamic_environments   => false,
   server_directory_environments => true,
@@ -39,9 +39,12 @@ class { '::puppet':
   #server_report_api             => 'v2',
 }
 
-class { '::puppetdb':
-  database_port   => '55432',
-  manage_firewall => false,
+class { '::puppetdb::server':
+  database_host     => 'pg1.localdomain',
+  database_name     => 'puppetdb',
+  database_username => 'puppetdbuser',
+  database_password => 'Pupp3t-DB-V00D00',
+  manage_firewall   => false,
   #manage_package_repo => false,
 }
 

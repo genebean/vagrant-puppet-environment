@@ -39,13 +39,16 @@ class { '::puppet':
   #server_report_api             => 'v2',
 }
 
-class { '::puppetdb':
-  database_port   => '55432',
-  manage_firewall => false,
-  #manage_package_repo => false,
-}
-
-class { '::puppetdb::master::config':
-  manage_storeconfigs     => false,
-  manage_report_processor => false,
-}
+# class { '::puppetdb::server':
+#   database_host     => 'pg1.localdomain',
+#   database_name     => 'puppetdb',
+#   database_username => 'puppetdbuser',
+#   database_password => 'Pupp3t-DB-V00D00',
+#   manage_firewall   => false,
+#   #manage_package_repo => false,
+# }
+#
+# class { '::puppetdb::master::config':
+#   manage_storeconfigs     => false,
+#   manage_report_processor => false,
+# }

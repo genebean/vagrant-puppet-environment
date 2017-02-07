@@ -23,11 +23,7 @@ class { '::puppet':
   server_environments_owner     => 'puppet',
   server_environments_group     => 'puppet',
   server_envs_dir               => '/etc/puppetlabs/code/environments',
-  server_common_modules_path    => [
-    '/etc/puppetlabs/code/environments/common',
-    '/etc/puppetlabs/code/modules',
-    '/opt/puppetlabs/puppet/modules',
-  ],
+  server_common_modules_path    => [],
   server_certname               => 'foreman.localdomain',
 
   server_service_fallback       => false,
@@ -51,4 +47,17 @@ class { '::puppetdb::server':
 class { '::puppetdb::master::config':
   manage_storeconfigs     => false,
   manage_report_processor => false,
+}
+
+class { 'r10k':
+  provider          => 'puppet_gem',
+  configfile        => '/etc/puppetlabs/r10k/r10k.yaml',
+  manage_modulepath => false,
+  sources           => {
+    'gitlab' => {
+      'remote'  => 'https://github.com/genebean/control-repo.git',
+      'basedir' => "/etc/puppetlabs/code/environments",
+      'prefix'  => false,
+    }
+  },
 }
