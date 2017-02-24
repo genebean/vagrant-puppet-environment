@@ -17,7 +17,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     pg1.vm.hostname = "pg1.localdomain"
 
     pg1.vm.provision "shell", inline: "systemctl restart network"
-  	pg1.vm.provision "shell", inline: "yum clean all"
+    pg1.vm.provision "shell", inline: "yum clean all"
     pg1.vm.provision "shell", inline: "puppet apply /vagrant/scripts/local-hosts.pp"
     pg1.vm.provision "shell", inline: "puppet module install puppetlabs-puppetdb"
     pg1.vm.provision "shell", inline: "puppet apply /vagrant/scripts/pg1-setup.pp"
@@ -33,21 +33,21 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     foreman.vm.hostname = "foreman.localdomain"
 
     foreman.vm.provision "shell", inline: "systemctl restart network"
-  	foreman.vm.provision "shell", inline: "yum clean all"
-  	foreman.vm.provision "shell", inline: "rpm -ivh --replacepkgs https://yum.theforeman.org/releases/1.14/el7/x86_64/foreman-release.rpm"
-  	foreman.vm.provision "shell", inline: "yum -y install foreman-installer"
+    foreman.vm.provision "shell", inline: "yum clean all"
+    foreman.vm.provision "shell", inline: "rpm -ivh --replacepkgs https://yum.theforeman.org/releases/1.14/el7/x86_64/foreman-release.rpm"
+    foreman.vm.provision "shell", inline: "yum -y install foreman-installer"
     foreman.vm.provision "shell", inline: "puppet apply /vagrant/scripts/local-hosts.pp"
 
     # --foreman-foreman-url='https://enc.localdomain' --foreman-passenger-interface=eth1
     # --foreman-server-ssl-cert --foreman-server-ssl-chain --foreman-server-ssl-key Defines Apache mod_ssl cert files.
-  	foreman.vm.provision "shell", inline: <<-EOF
+    foreman.vm.provision "shell", inline: <<-EOF
       foreman-installer --foreman-admin-password='password' \
       --puppet-server-implementation='puppetserver' \
       --puppet-server-jvm-max-heap-size='768m' --puppet-server-jvm-min-heap-size='768m' \
       --enable-foreman-compute-vmware --enable-foreman-plugin-bootdisk \
-  	  --enable-foreman-plugin-default-hostgroup --enable-foreman-plugin-hooks \
+      --enable-foreman-plugin-default-hostgroup --enable-foreman-plugin-hooks \
       --enable-foreman-plugin-setup --enable-foreman-plugin-tasks \
-  	  --enable-foreman-plugin-puppetdb \
+      --enable-foreman-plugin-puppetdb \
       --foreman-plugin-puppetdb-address='https://localhost:8081/pdb/cmd/v1' \
       --foreman-plugin-puppetdb-dashboard-address='http://localhost:8080/pdb/dashboard' \
       --foreman-proxy-realm=false \
