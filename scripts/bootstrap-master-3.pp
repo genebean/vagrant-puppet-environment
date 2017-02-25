@@ -35,8 +35,6 @@ class { '::puppet':
   server_foreman_ssl_ca         => '/etc/puppetlabs/puppet/ssl/ca/ca_crt.pem',
   server_foreman_ssl_cert       => '/etc/puppetlabs/puppet/ssl/certs/foreman.localdomain.pem',
   server_foreman_ssl_key        => '/etc/puppetlabs/puppet/ssl/private_keys/foreman.localdomain.pem',
-  #server_enc_api                => 'v2',
-  #server_report_api             => 'v2',
 }
 
 class { '::puppetdb::server':
