@@ -5,7 +5,7 @@ class { '::puppet':
   pluginsync                    => true,
   runmode                       => 'service',
   ca_server                     => 'foreman.localdomain',
-  dns_alt_names                 => [ 'puppet', 'puppet.localdomain', ],
+  dns_alt_names                 => [ 'puppet.localdomain', ],
 
   agent                         => true,
   puppetmaster                  => 'foreman.localdomain',
@@ -35,20 +35,4 @@ class { '::puppet':
   server_foreman_ssl_ca         => '/etc/puppetlabs/puppet/ssl/ca/ca_crt.pem',
   server_foreman_ssl_cert       => '/etc/puppetlabs/puppet/ssl/certs/foreman.localdomain.pem',
   server_foreman_ssl_key        => '/etc/puppetlabs/puppet/ssl/private_keys/foreman.localdomain.pem',
-  #server_enc_api                => 'v2',
-  #server_report_api             => 'v2',
 }
-
-# class { '::puppetdb::server':
-#   database_host     => 'pg1.localdomain',
-#   database_name     => 'puppetdb',
-#   database_username => 'puppetdbuser',
-#   database_password => 'Pupp3t-DB-V00D00',
-#   manage_firewall   => false,
-#   #manage_package_repo => false,
-# }
-#
-# class { '::puppetdb::master::config':
-#   manage_storeconfigs     => false,
-#   manage_report_processor => false,
-# }

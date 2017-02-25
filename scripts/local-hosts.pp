@@ -11,8 +11,8 @@ host { 'localhost':
 host { 'proxy.localdomain':
   ip           => '172.28.128.10',
   host_aliases => [
-    'puppet',
     'puppet.localdomain',
+    'enc.localdomain',
   ],
 }
 
