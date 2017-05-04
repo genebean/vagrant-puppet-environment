@@ -88,8 +88,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     foreman.vm.provision "shell", inline: "puppet agent -t || echo 'sleeping for a minute and trying again...'; sleep 60; puppet agent -t"
     foreman.vm.provision "shell", inline: "yum -y install sshpass"
     ssh_cmd = "sshpass -p 'vagrant' ssh -o StrictHostKeyChecking=no"
-    foreman.vm.provision "shell", inline: "#{ssh_cmd} pg1.localdomain 'puppet agent -t'"
-    foreman.vm.provision "shell", inline: "#{ssh_cmd} proxy.localdomain 'puppet agent -t'"
+    foreman.vm.provision "shell", inline: "until #{ssh_cmd} pg1.localdomain 'puppet agent -t'; do echo 'running puppet again on pg1.localdomain'; done"
+    foreman.vm.provision "shell", inline: "until #{ssh_cmd} proxy.localdomain 'puppet agent -t'; do echo 'running puppet again on proxy.localdomain'; done"
 
     foreman.vm.network "private_network", ip: "172.28.128.20"
 
