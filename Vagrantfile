@@ -53,7 +53,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     foreman.vm.provision "shell", inline: "systemctl restart network"
     foreman.vm.provision "shell", inline: "yum clean all"
-    foreman.vm.provision "shell", inline: "rpm -ivh --replacepkgs https://yum.theforeman.org/releases/1.14/el7/x86_64/foreman-release.rpm"
+    foreman.vm.provision "shell", inline: "rpm -ivh --replacepkgs https://yum.theforeman.org/releases/1.15/el7/x86_64/foreman-release.rpm"
     foreman.vm.provision "shell", inline: "yum -y install foreman-installer"
     foreman.vm.provision "shell", inline: "puppet apply /vagrant/scripts/local-hosts.pp"
 
