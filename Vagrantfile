@@ -38,6 +38,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     pg1.vm.provision "shell", inline: "systemctl restart network"
     pg1.vm.provision "shell", inline: "yum clean all"
     pg1.vm.provision "shell", inline: "puppet apply /vagrant/scripts/local-hosts.pp"
+    pg1.vm.provision "shell", inline: "puppet module install puppetlabs-concat --version 2.2.1" #Dependency requirement of theforeman-puppet
     pg1.vm.provision "shell", inline: "puppet module install puppetlabs-puppetdb"
     pg1.vm.provision "shell", inline: "puppet apply /vagrant/scripts/pg1-setup.pp"
     pg1.vm.provision "shell", inline: "puppet module install theforeman-puppet"
@@ -71,15 +72,17 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       --foreman-db-type='postgresql' --foreman-db-database='foreman' --foreman-db-host='pg1.localdomain' \
       --foreman-db-manage=false --foreman-db-username='foremandbuser' --foreman-db-password='Y3ll0-h@t' \
       --puppet-dns-alt-names='puppet.localdomain' \
-      --foreman-passenger-interface='172.28.128.20'
+      --foreman-passenger-interface='172.28.128.20' ; true
     EOF
 
     foreman.vm.provision "shell", inline: "echo '*.localdomain' > /etc/puppetlabs/puppet/autosign.conf"
 
-    foreman.vm.provision "shell", inline: "puppet module install theforeman-puppet"
+    #foreman.vm.provision "shell", inline: "puppet module install theforeman-puppet"
+    foreman.vm.provision "shell", inline: "yum install -y git; git clone https://github.com/theforeman/puppet-puppet.git /etc/puppetlabs/code/environments/production/modules/puppet"
     foreman.vm.provision "shell", inline: "puppet module install theforeman-foreman"
     foreman.vm.provision "shell", inline: "puppet module install puppetlabs-puppetdb"
     foreman.vm.provision "shell", inline: "puppet module install puppet-r10k"
+    foreman.vm.provision "shell", inline: "sed -i  '13i\"puppetlabs.trapperkeeper.services.metrics.metrics-service/metrics-webservice\": \"/metrics\"' /etc/puppetlabs/puppetserver/conf.d/web-routes.conf"
     foreman.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-master-1.pp"
     foreman.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-master-2.pp" # PupetDB setup
     foreman.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-master-3.pp" # starts using PuppetDB
@@ -94,7 +97,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     foreman.vm.network "private_network", ip: "172.28.128.20"
 
     foreman.vm.provider :virtualbox do |vb|
-      vb.customize ["modifyvm", :id, "--memory", "2048"]
+      vb.customize ["modifyvm", :id, "--memory", "4096"]
       vb.customize ["modifyvm", :id, "--cpus", "2"]
     end
   end
