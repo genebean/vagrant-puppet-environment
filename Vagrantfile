@@ -82,6 +82,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     foreman.vm.provision "shell", inline: "puppet module install theforeman-foreman"
     foreman.vm.provision "shell", inline: "puppet module install puppetlabs-puppetdb"
     foreman.vm.provision "shell", inline: "puppet module install puppet-r10k"
+    foreman.vm.provision "shell", inline: "puppet module install puppet-hiera"
     foreman.vm.provision "shell", inline: "sed -i  '13i\"puppetlabs.trapperkeeper.services.metrics.metrics-service/metrics-webservice\": \"/metrics\"' /etc/puppetlabs/puppetserver/conf.d/web-routes.conf"
     foreman.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-master-1.pp"
     foreman.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-master-2.pp" # PupetDB setup

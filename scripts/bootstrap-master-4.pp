@@ -59,3 +59,12 @@ class { 'r10k':
     }
   },
 }
+
+class { 'hiera':
+  hierarchy      => [
+    'nodes/%{::trusted.certname}',
+    'common',
+  ],
+  datadir        => '/etc/puppetlabs/code/environments/%{::environment}/hieradata',
+  datadir_manage => false,
+}
