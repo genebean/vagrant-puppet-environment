@@ -61,10 +61,11 @@ class { 'r10k':
 }
 
 class { 'hiera':
-  hierarchy      => [
+  hierarchy          => [
     'nodes/%{::trusted.certname}',
     'common',
   ],
-  datadir        => '/etc/puppetlabs/code/environments/%{::environment}/hieradata',
-  datadir_manage => false,
+  datadir            => '/etc/puppetlabs/code/environments/%{::environment}/hieradata',
+  datadir_manage     => false,
+  puppet_conf_manage => false,
 }
