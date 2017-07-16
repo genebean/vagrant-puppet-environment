@@ -53,21 +53,21 @@ if defined('$::control_repo_path') {
   $control_repo = 'https://github.com/genebean/control-repo.git'
 }
 
-class { 'r10k':
+class { '::r10k':
   provider          => 'puppet_gem',
   cachedir          => '/opt/puppetlabs/puppet/cache/r10k',
   configfile        => '/etc/puppetlabs/r10k/r10k.yaml',
   manage_modulepath => false,
   sources           => {
     'vcs' => {
-      'remote'  => "${control_repo}",
+      'remote'  => $::control_repo,
       'basedir' => '/etc/puppetlabs/code/environments',
       'prefix'  => false,
     }
   },
 }
 
-class { 'hiera':
+class { '::hiera':
   hierarchy          => [
     'nodes/%{::trusted.certname}',
     'common',
