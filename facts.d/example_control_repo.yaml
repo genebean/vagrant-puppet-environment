@@ -1,4 +1,4 @@
 # This is an example of how to use the control_repo_path custom fact
 # for deploying your own control repo instead of the default.
 #
-control_repo_path: 'https://github.com/thespain/control-repo.git'
+#control_repo_path: 'https://github.com/thespain/control-repo.git'
