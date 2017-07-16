@@ -2,3 +2,4 @@
 # for deploying your own control repo instead of the default.
 #
 #control_repo_path: 'https://github.com/thespain/control-repo.git'
+custom_fact_key: 'custom_fact_value'
