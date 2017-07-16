@@ -1,4 +1,5 @@
-class { 'puppetdb::database::postgresql':
+## The setting below accepts what will become the default
+class { '::puppetdb::database::postgresql':
   database_name     => 'puppetdb',
   database_username => 'puppetdbuser',
   database_password => 'Pupp3t-DB-V00D00',
