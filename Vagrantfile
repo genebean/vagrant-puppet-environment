@@ -94,7 +94,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     foreman.vm.network "private_network", ip: "172.28.128.20"
 
-    foreman.vm.synced_folder "custom-control-repo", "/etc/puppetlabs/facter/facts.d"
+    foreman.vm.synced_folder "facts.d", "/etc/puppetlabs/facter/facts.d"
 
     foreman.vm.provider :virtualbox do |vb|
       vb.customize ["modifyvm", :id, "--memory", "4096"]

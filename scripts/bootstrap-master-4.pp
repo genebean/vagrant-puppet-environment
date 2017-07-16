@@ -60,7 +60,7 @@ class { '::r10k':
   manage_modulepath => false,
   sources           => {
     'vcs' => {
-      'remote'  => $::control_repo,
+      'remote'  => $control_repo,
       'basedir' => '/etc/puppetlabs/code/environments',
       'prefix'  => false,
     }
