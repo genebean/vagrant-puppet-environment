@@ -1,4 +1,4 @@
 .idea/
 .vagrant/
-
+control_repo_path.yaml
 test.pp
