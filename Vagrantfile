@@ -18,8 +18,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     proxy.vm.provision "shell", inline: "systemctl restart network"
     proxy.vm.provision "shell", inline: "puppet apply /vagrant/scripts/local-hosts.pp"
-    proxy.vm.provision "shell", inline: "puppet module install theforeman-puppet"
-    proxy.vm.provision "shell", inline: "puppet module install puppetlabs-haproxy"
+    proxy.vm.provision "shell", inline: "puppet module install puppetlabs-concat --version 2.2.1" #puppetlabs-haproxy dep
+    proxy.vm.provision "shell", inline: "puppet module install theforeman-puppet --version 8.0.4"
+    proxy.vm.provision "shell", inline: "puppet module install puppetlabs-haproxy --version 1.5.0"
     proxy.vm.provision "shell", inline: "puppet apply /vagrant/scripts/proxy.pp"
     proxy.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-agent-install.pp"
     proxy.vm.provision "shell", inline: "rm -rf /etc/puppetlabs/code/environments/production/modules/*"
@@ -38,9 +39,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     pg1.vm.provision "shell", inline: "systemctl restart network"
     pg1.vm.provision "shell", inline: "yum clean all"
     pg1.vm.provision "shell", inline: "puppet apply /vagrant/scripts/local-hosts.pp"
-    pg1.vm.provision "shell", inline: "puppet module install puppetlabs-puppetdb"
+    pg1.vm.provision "shell", inline: "puppet module install puppetlabs-puppetdb --version 6.0.2"
     pg1.vm.provision "shell", inline: "puppet apply /vagrant/scripts/pg1-setup.pp"
-    pg1.vm.provision "shell", inline: "puppet module install theforeman-puppet"
+    pg1.vm.provision "shell", inline: "puppet module install theforeman-puppet --version 8.0.4"
     pg1.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-agent-install.pp"
     pg1.vm.provision "shell", inline: "rm -rf /etc/puppetlabs/code/environments/production/modules/*"
     pg1.vm.provision "shell", inline: "systemctl stop puppet"
@@ -53,7 +54,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     foreman.vm.provision "shell", inline: "systemctl restart network"
     foreman.vm.provision "shell", inline: "yum clean all"
-    foreman.vm.provision "shell", inline: "rpm -ivh --replacepkgs https://yum.theforeman.org/nightly/el7/x86_64/foreman-release.rpm"
+    foreman.vm.provision "shell", inline: "rpm -ivh --replacepkgs https://yum.theforeman.org/releases/1.16/el7/x86_64/foreman-release.rpm"
     foreman.vm.provision "shell", inline: "yum -y install foreman-installer"
     foreman.vm.provision "shell", inline: "puppet apply /vagrant/scripts/local-hosts.pp"
 
@@ -71,16 +72,21 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       --foreman-db-type='postgresql' --foreman-db-database='foreman' --foreman-db-host='pg1.localdomain' \
       --foreman-db-manage=false --foreman-db-username='foremandbuser' --foreman-db-password='Y3ll0-h@t' \
       --puppet-dns-alt-names='puppet.localdomain' \
-      --foreman-passenger-interface='172.28.128.20'
+      --foreman-passenger-interface='172.28.128.20';  exit 0
     EOF
+
+    # Exit 0 above and two inline commands due to http://projects.theforeman.org/issues/21306
+    foreman.vm.provision "shell", inline: "puppet module install puppetlabs-stdlib --version 4.23.0"
+    foreman.vm.provision "shell", inline: "puppet apply -e \"file_line { 'bootstrap filesystem watch': path => '/opt/puppetlabs/server/apps/puppetserver/config/services.d/bootstrap.cfg', line => 'puppetlabs.trapperkeeper.services.watcher.filesystem-watch-service/filesystem-watch-service',}\""
 
     foreman.vm.provision "shell", inline: "echo '*.localdomain' > /etc/puppetlabs/puppet/autosign.conf"
 
-    foreman.vm.provision "shell", inline: "puppet module install theforeman-puppet"
-    foreman.vm.provision "shell", inline: "puppet module install theforeman-foreman"
-    foreman.vm.provision "shell", inline: "puppet module install puppetlabs-puppetdb"
-    foreman.vm.provision "shell", inline: "puppet module install puppet-r10k"
-    foreman.vm.provision "shell", inline: "puppet module install puppet-hiera"
+    foreman.vm.provision "shell", inline: "puppet module install puppetlabs-inifile --version 1.6.0"
+    foreman.vm.provision "shell", inline: "puppet module install theforeman-puppet --version 8.0.4"
+    foreman.vm.provision "shell", inline: "puppet module install theforeman-foreman --version 8.1.1"
+    foreman.vm.provision "shell", inline: "puppet module install puppetlabs-puppetdb --version 6.0.2"
+    foreman.vm.provision "shell", inline: "puppet module install puppet-r10k --version 6.3.0"
+    foreman.vm.provision "shell", inline: "puppet module install puppet-hiera --version 3.3.0"
     foreman.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-master-1.pp"
     foreman.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-master-2.pp" # PupetDB setup
     foreman.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-master-3.pp" # starts using PuppetDB
@@ -107,7 +113,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     client.vm.provision "shell", inline: "systemctl restart network"
     client.vm.provision "shell", inline: "puppet apply /vagrant/scripts/local-hosts.pp"
-    client.vm.provision "shell", inline: "puppet module install theforeman-puppet"
+    client.vm.provision "shell", inline: "puppet module install theforeman-puppet --version 8.0.4"
     client.vm.provision "shell", inline: "puppet apply /vagrant/scripts/bootstrap-agent-install.pp"
     client.vm.provision "shell", inline: "rm -rf /etc/puppetlabs/code/environments/production/modules/*"
     client.vm.provision "shell", inline: "puppet agent -t || echo 'skipping since Puppet is already running.'"
