@@ -1,24 +1,26 @@
 # vim:ft=ruby
-source 'https://rubygems.org'
+source ENV['GEM_SOURCE'] || 'https://rubygems.org'
 
-if ENV.key?('PUPPET_VERSION')
-  puppetversion = "#{ENV['PUPPET_VERSION']}"
-else
-  puppetversion = '~> 5.0'
-end
+puppetversion = ENV.key?('PUPPET_VERSION') ? ENV['PUPPET_VERSION'] : ['~> 5.0']
 
 group :development, :unit_tests do
+  if puppetversion =~ / 4\./
+    gem 'rgen',                  '~> 0.8'
+  elsif puppetversion =~ / 5\./
+    gem 'CFPropertyList',        '~> 2.3'
+  end
 
-  gem 'json',                    '~> 2.1'
-  gem 'json_pure',               '~> 2.1'
-  gem 'CFPropertyList',          '~> 2.3'
+  gem 'json',                    '>= 2.0.2'
+  gem 'json_pure',               '>= 2.0.2'
   gem 'metadata-json-lint',      '~> 2.0'
-  gem 'semantic_puppet',         '~> 1.0' if puppetversion =~ /4./
-  gem 'rgen',                    '~> 0.8' if puppetversion =~ /4./
   gem 'puppet',                  puppetversion
   gem 'puppetlabs_spec_helper',  '~> 2.2'
   gem 'rspec-puppet',            '~> 2.6'
+  gem 'rspec-puppet-facts',      '~> 1.8'
+  gem 'semantic_puppet',         '~> 1.0'
+  gem 'syck',                    '>= 1.3.0'
   gem 'yamllint',                '~> 0.0.9'
+  gem 'coveralls',               require: false
 
   # puppet-lint and plugins
   gem 'puppet-lint',                                      '~> 2.2'
@@ -35,5 +37,5 @@ group :development, :unit_tests do
 end
 
 group :packaging do
-  gem 'puppet-blacksmith',       '>= 3.3.0'
+  gem 'puppet-blacksmith', '~> 3.4'
 end
