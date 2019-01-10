@@ -23,6 +23,7 @@ class { '::puppet':
   server_environments_owner     => 'puppet',
   server_environments_group     => 'puppet',
   server_envs_dir               => '/etc/puppetlabs/code/environments',
+  server_puppetserver_metrics   => true,
   server_common_modules_path    => [],
   server_certname               => 'foreman.localdomain',
 
@@ -47,15 +48,32 @@ class { '::puppetdb::master::config':
   manage_report_processor => false,
 }
 
-class { 'r10k':
+if defined('$::control_repo_path') {
+  $control_repo = $::control_repo_path
+} else {
+  $control_repo = 'https://github.com/genebean/control-repo.git'
+}
+
+class { '::r10k':
   provider          => 'puppet_gem',
+  cachedir          => '/opt/puppetlabs/puppet/cache/r10k',
   configfile        => '/etc/puppetlabs/r10k/r10k.yaml',
   manage_modulepath => false,
   sources           => {
-    'gitlab' => {
-      'remote'  => 'https://github.com/genebean/control-repo.git',
-      'basedir' => "/etc/puppetlabs/code/environments",
+    'vcs' => {
+      'remote'  => $control_repo,
+      'basedir' => '/etc/puppetlabs/code/environments',
       'prefix'  => false,
     }
   },
+}
+
+class { '::hiera':
+  hierarchy          => [
+    'nodes/%{::trusted.certname}',
+    'common',
+  ],
+  datadir            => '/etc/puppetlabs/code/environments/%{::environment}/hieradata',
+  datadir_manage     => false,
+  puppet_conf_manage => false,
 }
